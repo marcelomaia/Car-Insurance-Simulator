@@ -1,0 +1,58 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+share/python-wheels/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# Type checkers / linters (cache)
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# IDE / editor (keep team-shared VS Code settings out of ignore if you commit them)
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+*.tmp
+*.swp
+*~
+
+# Docker optional local overrides
+docker-compose.override.yml

@@ -1,0 +1,13 @@
+---
+description: DDD and Clean Architecture boundaries for this FastAPI service
+alwaysApply: true
+---
+
+# Architecture
+
+- **`domain/`**: entities, value objects, aggregates, domain events, port interfaces (ABCs). **No** FastAPI, Pydantic settings, or infrastructure implementations.
+- **`application/`**: use cases / application services; orchestrate domain logic and ports; depend on domain abstractions, not on adapters.
+- **`infrastructure/`**: `pydantic-settings`, mock GIS, adapters implementing domain ports.
+- **`presentation/`**: FastAPI routers and request/response schemas only; thin controllers that delegate to application layer.
+
+Dependency rule: **presentation → application → domain**; **infrastructure** implements ports defined in **domain** and is wired at the composition root (app factory / FastAPI `Depends()`).

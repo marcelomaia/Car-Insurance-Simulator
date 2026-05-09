@@ -1,0 +1,13 @@
+---
+description: Tooling stack — pyproject.toml, Ruff, pre-commit, pytest
+globs: "**/pyproject.toml"
+alwaysApply: false
+---
+
+# Tooling
+
+- **Dependencies**: single **`pyproject.toml`** — runtime under `[project].dependencies`, dev under `[project.optional-dependencies].dev`.
+- **Lint/format**: **Ruff** only (no Flake8). Line length **120**. Use `ruff format` and `ruff check`.
+- **Imports**: Ruff isort rules; set **`known-first-party`** to `domain`, `application`, `infrastructure`, `presentation` (adjust if layout changes).
+- **Pre-commit** (when added): `ruff format` → `ruff check` → `python scripts/check_order.py`.
+- **Tests**: pytest + httpx for API tests; optional pytest-asyncio if using async test mode.

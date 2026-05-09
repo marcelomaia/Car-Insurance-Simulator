@@ -1,0 +1,21 @@
+---
+description: Honeypot alphabetical ordering for Python defs, methods, and parameters
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Alphabetical order (mandatory)
+
+Before finishing a Python change:
+
+1. **Parameters** on every function/method (except `self` / `cls`) must be in **strict alphabetical order**.
+2. **Top-level** function and async function **names** in each module: **non-decreasing alphabetical order** by definition order.
+3. **Methods** on each class: **alphabetical by method name** (dunders use strict Unicode sort—underscores sort before letters).
+
+Validate with:
+
+```bash
+python scripts/check_order.py
+```
+
+Extend `scripts/check_order.py` in Phase 0 if it does not yet enforce definition-name order.
