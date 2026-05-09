@@ -50,6 +50,35 @@ flowchart TB
     Schemas --> Routers
 ```
 
+### Request flow — premium simulation (`POST /v1/premium/simulate`)
+
+The **router** only handles HTTP and dependency injection. **`simulation_inputs_from_http`** maps **`PremiumSimulationRequest`** → **`SimulationInputs`**. **`SimulatePremiumUseCase`** is the **only** place that calls **`PremiumCalculator`** and **`GisRateAdjustmentPort`** (the use case orchestrates the domain; the router never imports domain services). **`premium_simulation_response_from_calculated`** maps **`PremiumCalculated`** → **`PremiumSimulationResponse`** for JSON.
+
+```mermaid
+flowchart TB
+    HTTP([HTTP POST JSON]) --> Router["presentation: router"]
+    Router --> MapperIn["presentation: simulation_inputs_from_http"]
+    MapperIn --> DTO["application: SimulationInputs"]
+    DTO --> UC["application: SimulatePremiumUseCase.execute"]
+
+    subgraph domain_layer [domain — called only from use case]
+        Calc["PremiumCalculator"]
+        GisPort["GisRateAdjustmentPort"]
+        Result["PremiumCalculated"]
+    end
+
+    UC --> Calc
+    UC --> GisPort
+    UC --> Result
+    Result --> MapperOut["presentation: premium_simulation_response_from_calculated"]
+    MapperOut --> Out([HTTP JSON])
+
+    GISImpl["infrastructure: MockGisService"]
+    CFG["infrastructure: Settings"]
+    GISImpl -.implements.-> GisPort
+    CFG -.PremiumCalculationPolicy wired when building PremiumCalculator in deps.-> Calc
+```
+
 ---
 
 ## Phase 0 — Tooling, dependency contract, and honeypot checker
@@ -148,6 +177,7 @@ Python version in CI is pinned in the workflow file (currently **3.13** on `ubun
 - Use case orchestrates domain + GIS port.
 - GIS variation in **[-0.02, +0.02]** on the derived rate; pick additive vs multiplicative adjustment and document it in one place.
 - **Constructor parameters alphabetically** for application services.
+- **`SimulationInputs`** (**`application/dto/simulation_inputs.py`**) bundles **`broker_fee`**, **`car`**, **`current_year`**, **`deductible_percentage`**, **`registration_location`** so **`SimulatePremiumUseCase.execute`** takes one application DTO; HTTP mapping lives in **`presentation/mappers.py`**.
 
 ---
 
@@ -160,7 +190,7 @@ Python version in CI is pinned in the workflow file (currently **3.13** on `ubun
 
 ## Phase 4 — Presentation (`presentation/`)
 
-**Delivered:** `presentation/schemas/simulate_premium.py` (request/response models), `presentation/deps.py` (`Settings`, `MockGisService`, `SimulatePremiumUseCase`, `current_year`), `presentation/api/router.py` (**POST `/v1/premium/simulate`**), `presentation/app.py` (**`create_app()`**, **`DomainError` → 422** with `detail.code`), repo-root **`main.py`** (**`uvicorn main:app`**), **`presentation/tests/`** (`TestClient`).
+**Delivered:** `presentation/schemas/simulate_premium.py` (request/response models), `presentation/mappers.py` (**HTTP → `SimulationInputs`**), `presentation/deps.py` (`Settings`, `MockGisService`, `SimulatePremiumUseCase`, `current_year`), `presentation/api/router.py` (**POST `/v1/premium/simulate`** — thin controller), `presentation/app.py` (**`create_app()`**, **`DomainError` → 422** with `detail.code`), repo-root **`main.py`** (**`uvicorn main:app`**), **`presentation/tests/`** (`TestClient`).
 
 - **Input:** `broker_fee`, `deductible_percentage`, `make`, `model`, `registration_location` (optional), `value`, `year`.
 - **Output:** `applied_rate`, `calculated_premium`, `deductible_value`, `make`, `model`, `policy_limit`, `value`, `year`.

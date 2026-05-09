@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import pytest
 
+from application.dto.simulation_inputs import SimulationInputs
 from application.use_cases.simulate_premium import SimulatePremiumUseCase
 from domain.entities.car import Car
 from domain.exceptions import InvalidDeductiblePercentageError, NegativeAppliedRateError
@@ -48,11 +49,13 @@ def test_execute_passes_registration_location_to_gis_adapter():
         gis_rate_adjustment=spy,
     )
     use_case.execute(
-        broker_fee=Decimal("0"),
-        car=car,
-        current_year=2026,
-        deductible_percentage=Decimal("0"),
-        registration_location=addr,
+        SimulationInputs(
+            broker_fee=Decimal("0"),
+            car=car,
+            current_year=2026,
+            deductible_percentage=Decimal("0"),
+            registration_location=addr,
+        ),
     )
     assert spy.last_address == addr
 
@@ -65,11 +68,13 @@ def test_execute_raises_when_applied_rate_negative_after_gis():
     )
     with pytest.raises(NegativeAppliedRateError, match="applied_rate"):
         use_case.execute(
-            broker_fee=Decimal("0"),
-            car=car,
-            current_year=2026,
-            deductible_percentage=Decimal("0"),
-            registration_location=Address(city="X", country="Y"),
+            SimulationInputs(
+                broker_fee=Decimal("0"),
+                car=car,
+                current_year=2026,
+                deductible_percentage=Decimal("0"),
+                registration_location=Address(city="X", country="Y"),
+            ),
         )
 
 
@@ -85,8 +90,10 @@ def test_execute_raises_when_deductible_percentage_above_one():
     )
     with pytest.raises(InvalidDeductiblePercentageError, match="deductible_percentage"):
         use_case.execute(
-            broker_fee=Decimal("0"),
-            car=car,
-            current_year=2026,
-            deductible_percentage=Decimal("3"),
+            SimulationInputs(
+                broker_fee=Decimal("0"),
+                car=car,
+                current_year=2026,
+                deductible_percentage=Decimal("3"),
+            ),
         )

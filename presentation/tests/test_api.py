@@ -18,7 +18,7 @@ class _MinusFiveGis(GisRateAdjustmentPort):
 
 
 class _RaisesDomainError:
-    def execute(self, **kwargs):
+    def execute(self, inputs):
         raise DomainError("generic failure")
 
 

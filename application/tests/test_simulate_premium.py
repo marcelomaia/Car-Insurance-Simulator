@@ -2,6 +2,7 @@
 
 from decimal import Decimal
 
+from application.dto.simulation_inputs import SimulationInputs
 from application.use_cases.simulate_premium import SimulatePremiumUseCase
 from domain.entities.car import Car
 from domain.ports.gis_rate_adjustment import GisRateAdjustmentPort
@@ -44,11 +45,13 @@ def test_execute_applies_gis_when_registration_location_provided():
     )
     addr = Address(city="Lisbon", country="PT")
     result = use_case.execute(
-        broker_fee=Decimal("50"),
-        car=car,
-        current_year=2026,
-        deductible_percentage=Decimal("0.10"),
-        registration_location=addr,
+        SimulationInputs(
+            broker_fee=Decimal("50"),
+            car=car,
+            current_year=2026,
+            deductible_percentage=Decimal("0.10"),
+            registration_location=addr,
+        ),
     )
     assert result.applied_rate == Decimal("0.11")
 
@@ -60,10 +63,12 @@ def test_execute_matches_readme_decade_example_without_gis():
         gis_rate_adjustment=_SpyGis(),
     )
     result = use_case.execute(
-        broker_fee=Decimal("50"),
-        car=car,
-        current_year=2026,
-        deductible_percentage=Decimal("0.10"),
+        SimulationInputs(
+            broker_fee=Decimal("50"),
+            car=car,
+            current_year=2026,
+            deductible_percentage=Decimal("0.10"),
+        ),
     )
     assert result.applied_rate == Decimal("0.10")
     assert result.calculated_premium == Decimal("9050")
@@ -79,9 +84,11 @@ def test_execute_skips_gis_port_when_no_registration_location():
         gis_rate_adjustment=spy,
     )
     use_case.execute(
-        broker_fee=Decimal("0"),
-        car=car,
-        current_year=2026,
-        deductible_percentage=Decimal("0"),
+        SimulationInputs(
+            broker_fee=Decimal("0"),
+            car=car,
+            current_year=2026,
+            deductible_percentage=Decimal("0"),
+        ),
     )
     assert spy.call_count == 0
