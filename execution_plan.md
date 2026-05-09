@@ -118,12 +118,25 @@ pytest
 python scripts/check_order.py
 ```
 
+### Coverage (pytest-cov) and Sonar
+
+- **`[tool.coverage.run]`** and **`[tool.coverage.report]`** in [`pyproject.toml`](pyproject.toml) scope **`domain`** and **`scripts`**, and **omit** test folders / virtualenv paths so Sonar does not double-count tests as production gaps incorrectly at the coverage layer.
+- Generate **Cobertura XML** at the repo root (**`coverage.xml`**) for SonarCloud / SonarQube:
+
+```bash
+make coverage-xml   # XML only (Sonar)
+make coverage-html  # HTML under htmlcov/
+make coverage       # terminal + coverage.xml + htmlcov/
+```
+
+- **[`sonar-project.properties`](sonar-project.properties)** sets **`sonar.python.coverage.reportPaths=coverage.xml`**, **`sonar.sources=domain,scripts`**, **`sonar.tests=tests`**, and shared exclusions. Run the Sonar scanner after tests produce **`coverage.xml`** (CI already generates XML for upload if you add the Sonar step).
+
 ### GitHub Actions workflow
 
 - Workflow file: **[`.github/workflows/ci.yml`](.github/workflows/ci.yml)** (runs on **push** and **pull_request** to the default branch).
-- Jobs run **Ruff format** (`--check`), **Ruff lint** (`ruff check`), the **alphabetical-order** script, then **pytest** — same spirit as local **pre-commit**, enforced on every PR.
+- Jobs run **Ruff format** (`--check`), **Ruff lint** (`ruff check`), the **alphabetical-order** script, then **pytest with coverage** (`--cov=domain --cov=scripts`, **`coverage.xml`** for Sonar).
 
-Python version in CI matches **`requires-python`** (currently **3.11** on `ubuntu-latest`). Extend with a version matrix later if needed.
+Python version in CI is pinned in the workflow file (currently **3.13** on `ubuntu-latest`). Extend with a version matrix later if needed.
 
 ---
 

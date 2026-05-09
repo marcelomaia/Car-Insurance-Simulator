@@ -15,7 +15,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       - name: Install package (editable) with dev tools
         run: pip install -e ".[dev]"
@@ -29,5 +29,5 @@ jobs:
       - name: Alphabetical order (honeypot script)
         run: python scripts/check_order.py
 
-      - name: Pytest
-        run: pytest
+      - name: Pytest with coverage (XML for Sonar)
+        run: python -m pytest --cov=domain --cov=scripts --cov-report=xml:coverage.xml --cov-report=term-missing

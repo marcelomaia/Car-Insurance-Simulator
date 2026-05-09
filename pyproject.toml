@@ -17,12 +17,28 @@ dependencies = []
 dev = [
     "pre-commit>=4.0",
     "pytest>=8.0",
+    "pytest-cov>=6.0",
     "ruff==0.15.12",
 ]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = false
+source = ["domain", "scripts"]
+omit = [
+    "**/.venv/**",
+    "**/tests/**",
+    "**/venv/**",
+    "tests/**",
+]
+
+[tool.coverage.report]
+precision = 2
+skip_covered = false
+skip_empty = true
 
 [tool.ruff]
 line-length = 120
