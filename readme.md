@@ -1,5 +1,7 @@
 # Car Insurance Premium Simulator
 
+[![Coverage](https://sonarqube.mmaia.site/api/project_badges/measure?project=marcelomaia_Car-Insurance-Simulator_120e9ae5-a590-42e0-bf0a-75d1371a173c&metric=coverage&token=sqb_43a5c44ae8f3dcf79401220a6ed608b774f6cb8d)](https://sonarqube.mmaia.site/dashboard?id=marcelomaia_Car-Insurance-Simulator_120e9ae5-a590-42e0-bf0a-75d1371a173c)
+
 ## Description
 
 As a product owner, I want a backend service that calculates car insurance premiums based on a car's age, value, deductible percentage and a broker's fee. This ensures users receive an accurate and configurable insurance premium calculation. The service must be implemented using **FastAPI**, containerized with **Docker**, and designed following **Domain-Driven Design (DDD), S.O.L.I.D., and Clean Architecture** principles. The domain model should clearly distinguish between **value objects, entities, aggregates, services, and events**.

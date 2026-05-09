@@ -76,7 +76,7 @@ Use **setuptools** and **one** `pyproject.toml` (no separate `requirements.txt` 
 ### Coverage and pytest
 
 - **`[tool.coverage.run]` / `[tool.coverage.report]`** — omit tests, virtualenvs, non-business glue; tune **`fail_under`** after a baseline exists.
-- **`[tool.pytest.ini_options]`** — no Django settings. Use e.g. `testpaths = ["tests"]`. If **`asyncio_mode = "auto"`**, add **`pytest-asyncio`** under **dev**.
+- **`[tool.pytest.ini_options]`** — no Django settings. Point **`testpaths`** at **`domain/tests`** and **`scripts/tests`** (and any other test roots). If **`asyncio_mode = "auto"`**, add **`pytest-asyncio`** under **dev**.
 
 ### Honeypot script and pre-commit
 
@@ -107,8 +107,8 @@ Follow-up to Phase 1: lock in **automated quality gates** so domain math and too
 
 ### Automated tests (pytest)
 
-- **`tests/domain/`** — unit tests for pure domain services (`compute_*` helpers), pinned numeric expectations aligned with [readme.md](readme.md) (e.g. age/value rate example).
-- **`tests/test_check_order.py`** — regression tests for [scripts/check_order.py](scripts/check_order.py) (parameter order, module/class/method definition order, CLI exit codes).
+- **`domain/tests/`** — unit tests for pure domain services (`compute_*` helpers), pinned numeric expectations aligned with [readme.md](readme.md) (e.g. age/value rate example).
+- **`scripts/tests/test_check_order.py`** — regression tests for [scripts/check_order.py](scripts/check_order.py) (parameter order, module/class/method definition order, CLI exit codes).
 
 Run locally:
 

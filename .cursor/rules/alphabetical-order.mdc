@@ -10,7 +10,8 @@ Before finishing a Python change:
 
 1. **Parameters** on every function/method (except `self` / `cls`) must be in **strict alphabetical order**.
 2. **Top-level** function and async function **names** in each module: **non-decreasing alphabetical order** by definition order.
-3. **Methods** on each class: **alphabetical by method name** (dunders use strict Unicode sort—underscores sort before letters).
+3. **Typed class fields** (`name: Type` / `@dataclass` fields): **alphabetical by field name** in source order (simple `AnnAssign` targets only).
+4. **Methods** on each class: **alphabetical by method name** (dunders use strict Unicode sort—underscores sort before letters).
 
 `scripts/check_order.py` enforces (1)–(3) plus **module-level class definition order** (`ClassDef` names in source order must be sorted).
 

@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["domain*"]
+exclude = ["domain.tests*", "scripts.tests*"]
 
 [project]
 name = "car-insurance-premium-simulator"
@@ -23,7 +24,7 @@ dev = [
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["tests"]
+testpaths = ["domain/tests", "scripts/tests"]
 
 [tool.coverage.run]
 branch = false
@@ -32,7 +33,8 @@ omit = [
     "**/.venv/**",
     "**/tests/**",
     "**/venv/**",
-    "tests/**",
+    "domain/tests/**",
+    "scripts/tests/**",
 ]
 
 [tool.coverage.report]

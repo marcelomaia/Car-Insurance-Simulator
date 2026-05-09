@@ -8,7 +8,7 @@ import pytest
 
 from scripts.check_order import verify_file, verify_source
 
-_CHECK_ORDER_SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "check_order.py"
+_CHECK_ORDER_SCRIPT = Path(__file__).resolve().parents[1] / "check_order.py"
 
 
 def test_async_invalid_parameter_order():
@@ -19,6 +19,16 @@ def test_async_invalid_parameter_order():
 def test_async_valid_parameter_order():
     source = "async def alpha(alpha, zeta):\n    pass\n"
     assert verify_source(source, "async_valid.py") == 0
+
+
+def test_class_attributes_invalid_order():
+    source = "class C:\n    z: int\n    a: int\n"
+    assert verify_source(source, "attrs_bad.py") == 1
+
+
+def test_class_attributes_valid_order():
+    source = "class C:\n    a: int\n    z: int\n"
+    assert verify_source(source, "attrs_ok.py") == 0
 
 
 def test_class_methods_invalid_order():

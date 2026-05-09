@@ -3,6 +3,23 @@ import glob
 import sys
 
 
+def count_class_attribute_order_violations(filepath, tree):
+    errors = 0
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ClassDef):
+            continue
+        names = []
+        for stmt in node.body:
+            if isinstance(stmt, ast.AnnAssign) and isinstance(stmt.target, ast.Name):
+                names.append(stmt.target.id)
+        if names != sorted(names):
+            print(f"❌ Invalid typed-field order in class '{node.name}' in file {filepath}")
+            print(f"   Current order: {names}")
+            print(f"   Expected order: {sorted(names)}\n")
+            errors += 1
+    return errors
+
+
 def count_class_method_order_violations(filepath, tree):
     errors = 0
     for node in ast.walk(tree):
@@ -68,6 +85,7 @@ def verify_source(content, filepath):
         return 0
 
     errors = 0
+    errors += count_class_attribute_order_violations(filepath, tree)
     errors += count_class_method_order_violations(filepath, tree)
     errors += count_module_class_order_violations(filepath, tree)
     errors += count_module_function_order_violations(filepath, tree)
@@ -86,7 +104,7 @@ if __name__ == "__main__":
             total_errors += verify_file(filepath)
 
     if total_errors == 0:
-        print("✅ OK: functions, classes, methods, and parameters are in alphabetical order.")
+        print("✅ OK: functions, classes, methods, typed class fields, and parameters are in order.")
     else:
         print(f"🚨 Found {total_errors} alphabetical-order violation(s). Fix them before submitting.")
 
