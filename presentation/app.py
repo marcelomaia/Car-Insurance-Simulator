@@ -10,7 +10,7 @@ from presentation.api.router import router
 def create_app() -> FastAPI:
     """Wire router and map ``DomainError`` subclasses to HTTP **422** (readme §5 / execution plan Phase 4)."""
 
-    async def domain_error_handler(_request: Request, exc: DomainError) -> JSONResponse:
+    def domain_error_handler(_request: Request, exc: DomainError) -> JSONResponse:
         if isinstance(exc, InvalidDeductiblePercentageError):
             code = "invalid_deductible_percentage"
         elif isinstance(exc, NegativeAppliedRateError):

@@ -16,7 +16,7 @@ from presentation.schemas.simulate_premium import (
 router = APIRouter(prefix="/v1", tags=["premium"])
 
 
-@router.post("/premium/simulate", response_model=PremiumSimulationResponse)
+@router.post("/premium/simulate")
 def simulate_premium(
     body: PremiumSimulationRequest,
     current_year: Annotated[int, Depends(get_current_year)],
