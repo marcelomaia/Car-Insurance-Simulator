@@ -1,0 +1,21 @@
+---
+description: Domain layer — enrich models with OO (policies, calculator services, entities); avoid flat procedural modules
+globs: "domain/**/*.py"
+alwaysApply: false
+---
+
+# Rich domain models (OO)
+
+When adding or changing code under **`domain/`**:
+
+1. **Prefer classes over loose module-level functions** for business rules, tariffs, and orchestration. Use **immutable dataclasses** (`frozen=True`) for configuration snapshots and value-heavy types.
+2. **Group coefficients** (rates, chunk sizes, coverage %) into a dedicated type (e.g. **`PremiumCalculationPolicy`**) instead of threading many primitives through standalone `compute_*` functions.
+3. **Use a domain service class** (e.g. **`PremiumCalculator`**) that takes the policy (and later ports) via **`__init__`**, with **methods** that accept **`Car`** and other domain types where the readme implies “car details”, not raw floats scattered everywhere.
+4. **Entities and VOs** should carry behavior when it is intrinsic to that concept; keep **pure helpers** only when they are tiny and clearly subordinate to a class (or private methods on the service).
+5. **Do not** recreate “script style” modules: a long list of public **`def compute_*`** at module top without a coordinating type is **discouraged** for this project.
+
+**Reference pattern:** [`domain/services/premium_calculation.py`](domain/services/premium_calculation.py) — `PremiumCalculationPolicy` + `PremiumCalculator` + `Car`.
+
+Use **`decimal.Decimal`** for money-like amounts, tariff coefficients, and rates—avoid **`float`** for those semantics (binary floats are not audit-grade for premiums).
+
+No FastAPI, Pydantic settings, or infrastructure imports in **`domain/`**.

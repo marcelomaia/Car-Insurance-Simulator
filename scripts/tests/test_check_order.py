@@ -1,3 +1,4 @@
+import ast
 import glob
 import io
 import runpy
@@ -6,7 +7,12 @@ from pathlib import Path
 
 import pytest
 
-from scripts.check_order import verify_file, verify_source
+from scripts.check_order import (
+    count_module_class_order_violations,
+    count_module_function_order_violations,
+    verify_file,
+    verify_source,
+)
 
 _CHECK_ORDER_SCRIPT = Path(__file__).resolve().parents[1] / "check_order.py"
 
@@ -111,6 +117,12 @@ def test_module_functions_invalid_order():
 def test_module_functions_valid_order():
     source = "def a():\n    pass\ndef z():\n    pass\n"
     assert verify_source(source, "funcs_ok.py") == 0
+
+
+def test_module_order_helpers_return_zero_for_eval_expression_tree():
+    tree = ast.parse("1 + 2", mode="eval")
+    assert count_module_class_order_violations("expr.py", tree) == 0
+    assert count_module_function_order_violations("expr.py", tree) == 0
 
 
 def test_multiple_functions_counts_all_violations():

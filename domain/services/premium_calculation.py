@@ -1,58 +1,70 @@
-"""Pure premium and policy-limit calculations (no clock; callers pass ``current_year``)."""
+"""Premium calculation policy and orchestrator (pure domain; ``current_year`` passed in per call).
 
+Money-like amounts and tariff coefficients use :class:`decimal.Decimal` instead of ``float``
+so decimal fractions (rates, premiums, limits) stay exact under arithmetic—binary floats are
+not suitable for regulated monetary semantics.
+"""
+
+from dataclasses import dataclass
+from decimal import Decimal
+
+from domain.entities.car import Car
 from domain.value_objects.policy_limit_breakdown import PolicyLimitBreakdown
 from domain.value_objects.premium_breakdown import PremiumBreakdown
 
 
-def compute_applied_rate(gis_rate_variation: float, intrinsic_rate: float) -> float:
-    """GIS adjustment is applied additively to the intrinsic decimal rate (e.g. +0.01 = +1%)."""
-    return intrinsic_rate + gis_rate_variation
+@dataclass(frozen=True)
+class PremiumCalculationPolicy:
+    """Configurable tariff coefficients (typically loaded via settings in outer layers)."""
+
+    base_coverage_percentage: Decimal
+    rate_per_age_year: Decimal
+    rate_per_value_chunk: Decimal
+    value_chunk_size: Decimal
 
 
-def compute_intrinsic_rate(
-    car_value: float,
-    current_year: int,
-    rate_per_age_year: float,
-    rate_per_value_chunk: float,
-    value_chunk_size: float,
-    vehicle_year: int,
-) -> float:
-    """Combine age-based and value-chunk rate contributions using caller-supplied coefficients."""
-    age_years = max(0, current_year - vehicle_year)
-    age_component = age_years * rate_per_age_year
-    value_component = (car_value / value_chunk_size) * rate_per_value_chunk
-    return age_component + value_component
+@dataclass(frozen=True)
+class PremiumCalculator:
+    """Encapsulates rating rules bound to a ``PremiumCalculationPolicy``."""
 
+    policy: PremiumCalculationPolicy
 
-def compute_policy_limit_breakdown(
-    base_coverage_percentage: float,
-    car_value: float,
-    deductible_percentage: float,
-) -> PolicyLimitBreakdown:
-    """Derive base limit, deductible monetary value, and final policy limit per product rules."""
-    base_policy_limit = car_value * base_coverage_percentage
-    deductible_value = base_policy_limit * deductible_percentage
-    policy_limit = base_policy_limit - deductible_value
-    return PolicyLimitBreakdown(
-        base_policy_limit=base_policy_limit,
-        deductible_value=deductible_value,
-        policy_limit=policy_limit,
-    )
+    def compute_applied_rate(self, gis_rate_variation: Decimal, intrinsic_rate: Decimal) -> Decimal:
+        """GIS adjustment is applied additively to the intrinsic decimal rate (e.g. +0.01 = +1%)."""
+        return intrinsic_rate + gis_rate_variation
 
+    def compute_intrinsic_rate(self, car: Car, current_year: int) -> Decimal:
+        """Combine age-based and value-chunk rate contributions for ``car``."""
+        age_years = max(0, current_year - car.year)
+        age_component = Decimal(age_years) * self.policy.rate_per_age_year
+        value_component = (car.value / self.policy.value_chunk_size) * self.policy.rate_per_value_chunk
+        return age_component + value_component
 
-def compute_premium_breakdown(
-    applied_rate: float,
-    broker_fee: float,
-    car_value: float,
-    deductible_percentage: float,
-) -> PremiumBreakdown:
-    """Compute base premium, deductible discount, and final premium including broker fee."""
-    base_premium = car_value * applied_rate
-    deductible_discount = base_premium * deductible_percentage
-    calculated_premium = base_premium - deductible_discount + broker_fee
-    return PremiumBreakdown(
-        applied_rate=applied_rate,
-        base_premium=base_premium,
-        calculated_premium=calculated_premium,
-        deductible_discount=deductible_discount,
-    )
+    def compute_policy_limit_breakdown(self, car: Car, deductible_percentage: Decimal) -> PolicyLimitBreakdown:
+        """Derive base limit, deductible monetary value, and final policy limit per product rules."""
+        base_policy_limit = car.value * self.policy.base_coverage_percentage
+        deductible_value = base_policy_limit * deductible_percentage
+        policy_limit = base_policy_limit - deductible_value
+        return PolicyLimitBreakdown(
+            base_policy_limit=base_policy_limit,
+            deductible_value=deductible_value,
+            policy_limit=policy_limit,
+        )
+
+    def compute_premium_breakdown(
+        self,
+        applied_rate: Decimal,
+        broker_fee: Decimal,
+        car: Car,
+        deductible_percentage: Decimal,
+    ) -> PremiumBreakdown:
+        """Compute base premium, deductible discount, and final premium including broker fee."""
+        base_premium = car.value * applied_rate
+        deductible_discount = base_premium * deductible_percentage
+        calculated_premium = base_premium - deductible_discount + broker_fee
+        return PremiumBreakdown(
+            applied_rate=applied_rate,
+            base_premium=base_premium,
+            calculated_premium=calculated_premium,
+            deductible_discount=deductible_discount,
+        )
