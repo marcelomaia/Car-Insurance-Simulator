@@ -18,6 +18,8 @@ As a product owner, I want a backend service that calculates car insurance premi
 
 Phased roadmap and progress checklist: [execution_plan.md](execution_plan.md).
 
+**Docker run + evaluator smoke test (curl, payload, expected JSON):** [running.md](running.md).
+
 ---
 
 ## Core Requirements and Calculation Logic

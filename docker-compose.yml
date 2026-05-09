@@ -5,6 +5,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    # Injects `CAR_INSURANCE_*` from a host `.env` into the container (Settings also reads env vars).
+    # Copy `.env.example` → `.env` to override defaults; omit `.env` to use built-in defaults.
+    env_file:
+      - path: .env
+        required: false
     environment:
       TZ: UTC
     healthcheck:

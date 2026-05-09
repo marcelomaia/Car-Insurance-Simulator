@@ -11,7 +11,7 @@ This document is the canonical phased implementation plan for this repository. S
 - [x] Phase 3 — Infrastructure (`infrastructure/`: `pydantic-settings`, mock GIS)
 - [x] Phase 4 — Presentation (`presentation/`: FastAPI routers, IO schemas)
 - [x] Phase 5 — Docker (`Dockerfile`, `docker-compose.yml`)
-- [ ] Phase 6 — Tests and docs (pytest, readme updates as needed)
+- [x] Phase 6 — Update docs
 
 ---
 
