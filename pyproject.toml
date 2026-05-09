@@ -11,9 +11,33 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = [
+    "pre-commit>=4.0",
     "pytest>=8.0",
+    "ruff==0.15.12",
 ]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "B",
+    "UP",
+    "SIM",
+    "C4",
+    "PLC",
+    "C901",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["application", "domain", "infrastructure", "presentation", "scripts"]

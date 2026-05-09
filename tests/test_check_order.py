@@ -1,8 +1,8 @@
-from contextlib import redirect_stdout
 import glob
 import io
-from pathlib import Path
 import runpy
+from contextlib import redirect_stdout
+from pathlib import Path
 
 import pytest
 
@@ -21,13 +21,18 @@ def test_async_valid_parameter_order():
     assert verify_source(source, "async_valid.py") == 0
 
 
+def test_class_methods_invalid_order():
+    source = "class C:\n    def b(self):\n        pass\n    def a(self):\n        pass\n"
+    assert verify_source(source, "methods_bad.py") == 1
+
+
+def test_class_methods_valid_order():
+    source = "class C:\n    def a(self):\n        pass\n    def b(self):\n        pass\n"
+    assert verify_source(source, "methods_ok.py") == 0
+
+
 def test_cls_first_parameter_ignored():
-    source = (
-        "class Beta:\n"
-        "    @classmethod\n"
-        "    def gamma(cls, apple, banana):\n"
-        "        pass\n"
-    )
+    source = "class Beta:\n    @classmethod\n    def gamma(cls, apple, banana):\n        pass\n"
     assert verify_source(source, "cls_ok.py") == 0
 
 
@@ -52,9 +57,8 @@ def test_main_exits_nonzero_when_parameters_unsorted(monkeypatch, tmp_path):
     monkeypatch.setattr(glob, "glob", fake_glob)
 
     buffer = io.StringIO()
-    with redirect_stdout(buffer):
-        with pytest.raises(SystemExit) as exc_info:
-            runpy.run_path(str(_CHECK_ORDER_SCRIPT), run_name="__main__")
+    with redirect_stdout(buffer), pytest.raises(SystemExit) as exc_info:
+        runpy.run_path(str(_CHECK_ORDER_SCRIPT), run_name="__main__")
     assert exc_info.value.code == 1
 
 
@@ -69,39 +73,48 @@ def test_main_exits_zero_when_all_parameters_sorted(monkeypatch, tmp_path):
     monkeypatch.setattr(glob, "glob", fake_glob)
 
     buffer = io.StringIO()
-    with redirect_stdout(buffer):
-        with pytest.raises(SystemExit) as exc_info:
-            runpy.run_path(str(_CHECK_ORDER_SCRIPT), run_name="__main__")
+    with redirect_stdout(buffer), pytest.raises(SystemExit) as exc_info:
+        runpy.run_path(str(_CHECK_ORDER_SCRIPT), run_name="__main__")
     assert exc_info.value.code == 0
 
 
+def test_module_classes_invalid_order():
+    source = "class Z:\n    pass\nclass A:\n    pass\n"
+    assert verify_source(source, "classes_bad.py") == 1
+
+
+def test_module_classes_valid_order():
+    source = "class A:\n    pass\nclass Z:\n    pass\n"
+    assert verify_source(source, "classes_ok.py") == 0
+
+
+def test_module_functions_and_parameters_both_invalid():
+    source = "def foo(banana, apple):\n    pass\ndef bar():\n    pass\n"
+    assert verify_source(source, "both_bad.py") == 2
+
+
+def test_module_functions_invalid_order():
+    source = "def z():\n    pass\ndef a():\n    pass\n"
+    assert verify_source(source, "funcs_bad.py") == 1
+
+
+def test_module_functions_valid_order():
+    source = "def a():\n    pass\ndef z():\n    pass\n"
+    assert verify_source(source, "funcs_ok.py") == 0
+
+
 def test_multiple_functions_counts_all_violations():
-    source = (
-        "def first(z, a):\n"
-        "    pass\n"
-        "\n"
-        "def second(b, a):\n"
-        "    pass\n"
-    )
+    source = "def first(z, a):\n    pass\n\ndef second(b, a):\n    pass\n"
     assert verify_source(source, "multi.py") == 2
 
 
 def test_nested_function_invalid_order():
-    source = (
-        "def outer():\n"
-        "    def inner(z, a):\n"
-        "        pass\n"
-        "    return inner\n"
-    )
+    source = "def outer():\n    def inner(z, a):\n        pass\n    return inner\n"
     assert verify_source(source, "nested.py") == 1
 
 
 def test_self_first_parameter_ignored():
-    source = (
-        "class Delta:\n"
-        "    def method(self, apple, banana):\n"
-        "        pass\n"
-    )
+    source = "class Delta:\n    def method(self, apple, banana):\n        pass\n"
     assert verify_source(source, "self_ok.py") == 0
 
 

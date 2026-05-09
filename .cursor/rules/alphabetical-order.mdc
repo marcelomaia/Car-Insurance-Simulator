@@ -12,10 +12,10 @@ Before finishing a Python change:
 2. **Top-level** function and async function **names** in each module: **non-decreasing alphabetical order** by definition order.
 3. **Methods** on each class: **alphabetical by method name** (dunders use strict Unicode sort—underscores sort before letters).
 
+`scripts/check_order.py` enforces (1)–(3) plus **module-level class definition order** (`ClassDef` names in source order must be sorted).
+
 Validate with:
 
 ```bash
 python scripts/check_order.py
 ```
-
-Extend `scripts/check_order.py` in Phase 0 if it does not yet enforce definition-name order.
