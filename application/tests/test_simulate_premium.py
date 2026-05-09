@@ -20,6 +20,17 @@ def _calculator():
     return PremiumCalculator(policy=policy)
 
 
+def _calculator_custom_tariff_like_env_example():
+    """Tariff matching a typical overridden `.env`: higher per-year chunk rate and smaller value chunk."""
+    policy = PremiumCalculationPolicy(
+        base_coverage_percentage=Decimal("1"),
+        rate_per_age_year=Decimal("0.007"),
+        rate_per_value_chunk=Decimal("0.009"),
+        value_chunk_size=Decimal("9000"),
+    )
+    return PremiumCalculator(policy=policy)
+
+
 class _FixedGis(GisRateAdjustmentPort):
     def __init__(self, variation: Decimal) -> None:
         self._variation = variation
@@ -54,6 +65,34 @@ def test_execute_applies_gis_when_registration_location_provided():
         ),
     )
     assert result.applied_rate == Decimal("0.11")
+
+
+def test_execute_custom_tariff_premium_breakdown_includes_broker_fee():
+    """Custom coefficients (as if from ``CAR_INSURANCE_*`` env): intrinsic rate 17% for 2016 car in 2026.
+
+    ``applied_rate`` = 10×0.007 + (100000/9000)×0.009 = 0.07 + 0.10 = 0.17.
+
+    Premium (readme §2): ``value × applied_rate`` minus deductible discount on that base, **plus broker fee**.
+    The **50** is ``broker_fee`` from the request / ``SimulationInputs`` — not from the tariff env vars.
+    So: 100000×0.17 − (17000×0.10) + 50 = 17000 − 1700 + 50 = 15350.
+    """
+    car = Car(make="Toyota", model="Corolla", value=Decimal("100000"), year=2016)
+    use_case = SimulatePremiumUseCase(
+        calculator=_calculator_custom_tariff_like_env_example(),
+        gis_rate_adjustment=_SpyGis(),
+    )
+    result = use_case.execute(
+        SimulationInputs(
+            broker_fee=Decimal("50"),
+            car=car,
+            current_year=2026,
+            deductible_percentage=Decimal("0.10"),
+        ),
+    )
+    assert result.applied_rate == Decimal("0.17")
+    assert result.calculated_premium == Decimal("15350")
+    assert result.deductible_value == Decimal("10000")
+    assert result.policy_limit == Decimal("90000")
 
 
 def test_execute_matches_readme_decade_example_without_gis():

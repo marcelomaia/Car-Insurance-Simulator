@@ -14,7 +14,15 @@ When the API is up:
 | **ReDoc** | http://localhost:8000/redoc |
 | **Health** | http://localhost:8000/health |
 
-Overrides: copy [`.env.example`](.env.example) to **`.env`** in the repo root — Compose passes **`CAR_INSURANCE_*`** into the container via `env_file` (optional file; defaults apply if `.env` is absent).
+### Configuration (optional)
+
+Copy the example file and edit tariff parameters as needed:
+
+```bash
+cp .env.example .env
+```
+
+You can change any **`CAR_INSURANCE_*`** value in **`.env`** (coverage factor, rate per year, rate per value chunk, chunk size — see comments inside [`.env.example`](.env.example)). Docker Compose loads **`.env`** from the repo root and injects those variables into the container. If **`.env`** does not exist, the app uses the built-in defaults.
 
 ---
 

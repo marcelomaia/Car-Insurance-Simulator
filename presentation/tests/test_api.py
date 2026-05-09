@@ -8,8 +8,9 @@ from fastapi.testclient import TestClient
 from domain.exceptions import DomainError
 from domain.ports.gis_rate_adjustment import GisRateAdjustmentPort
 from domain.value_objects.address import Address
+from infrastructure.config.settings import Settings
 from presentation.app import create_app
-from presentation.deps import get_current_year, get_gis_service, get_simulate_use_case
+from presentation.deps import get_current_year, get_gis_service, get_settings, get_simulate_use_case
 
 
 class _MinusFiveGis(GisRateAdjustmentPort):
@@ -89,9 +90,10 @@ def test_simulate_negative_applied_rate_returns_422():
     assert response.json()["detail"]["code"] == "negative_applied_rate"
 
 
-def test_simulate_success_matches_readme_decade_example():
+def test_simulate_success_matches_readme_decade_example(clear_car_insurance_env):
     application = create_app()
     application.dependency_overrides[get_current_year] = lambda: 2026
+    application.dependency_overrides[get_settings] = lambda: Settings(_env_file=None)
     client = TestClient(application)
     response = client.post(
         "/v1/premium/simulate",
