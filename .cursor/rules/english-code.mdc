@@ -1,0 +1,10 @@
+---
+description: Source code, comments, docstrings, and user-facing CLI strings must be English
+alwaysApply: true
+---
+
+# English-only codebase
+
+- **Code**: identifiers, comments, **`README`/`execution_plan` technical sections**, commit messages in PRs, and **runtime messages** (CLI prints, API error strings, log templates) must be **English**.
+- **Exceptions**: product copy localized elsewhere, legal text, or files explicitly marked as locale-specific—keep those isolated and do not mix languages in the same module.
+- Prefer clear, neutral technical English over idiomatic slang.

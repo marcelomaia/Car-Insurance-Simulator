@@ -4,17 +4,17 @@ import sys
 
 
 def count_class_method_order_violations(filepath, tree):
-    erros = 0
+    errors = 0
     for node in ast.walk(tree):
         if not isinstance(node, ast.ClassDef):
             continue
         names = [stmt.name for stmt in node.body if isinstance(stmt, (ast.AsyncFunctionDef, ast.FunctionDef))]
         if names != sorted(names):
-            print(f"❌ ERRO na ordem dos métodos da classe '{node.name}' no arquivo {filepath}")
-            print(f"   Ordem atual:  {names}")
-            print(f"   Deveria ser:  {sorted(names)}\n")
-            erros += 1
-    return erros
+            print(f"❌ Invalid method order in class '{node.name}' in file {filepath}")
+            print(f"   Current order: {names}")
+            print(f"   Expected order: {sorted(names)}\n")
+            errors += 1
+    return errors
 
 
 def count_module_class_order_violations(filepath, tree):
@@ -22,9 +22,9 @@ def count_module_class_order_violations(filepath, tree):
         return 0
     names = [stmt.name for stmt in tree.body if isinstance(stmt, ast.ClassDef)]
     if names != sorted(names):
-        print(f"❌ ERRO na ordem das classes no módulo no arquivo {filepath}")
-        print(f"   Ordem atual:  {names}")
-        print(f"   Deveria ser:  {sorted(names)}\n")
+        print(f"❌ Invalid class order at module scope in file {filepath}")
+        print(f"   Current order: {names}")
+        print(f"   Expected order: {sorted(names)}\n")
         return 1
     return 0
 
@@ -34,25 +34,25 @@ def count_module_function_order_violations(filepath, tree):
         return 0
     names = [stmt.name for stmt in tree.body if isinstance(stmt, (ast.AsyncFunctionDef, ast.FunctionDef))]
     if names != sorted(names):
-        print(f"❌ ERRO na ordem das funções no módulo no arquivo {filepath}")
-        print(f"   Ordem atual:  {names}")
-        print(f"   Deveria ser:  {sorted(names)}\n")
+        print(f"❌ Invalid function order at module scope in file {filepath}")
+        print(f"   Current order: {names}")
+        print(f"   Expected order: {sorted(names)}\n")
         return 1
     return 0
 
 
 def count_parameter_order_violations(filepath, tree):
-    erros = 0
+    errors = 0
     for node in ast.walk(tree):
         if not isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef)):
             continue
         args = [arg.arg for arg in node.args.args if arg.arg not in ("cls", "self")]
         if args != sorted(args):
-            print(f"❌ ERRO na função/método '{node.name}' no arquivo {filepath}")
-            print(f"   Ordem atual:  {args}")
-            print(f"   Deveria ser:  {sorted(args)}\n")
-            erros += 1
-    return erros
+            print(f"❌ Invalid parameter order in function/method '{node.name}' in file {filepath}")
+            print(f"   Current order: {args}")
+            print(f"   Expected order: {sorted(args)}\n")
+            errors += 1
+    return errors
 
 
 def verify_file(filepath):
@@ -67,27 +67,27 @@ def verify_source(content, filepath):
     except SyntaxError:
         return 0
 
-    erros = 0
-    erros += count_class_method_order_violations(filepath, tree)
-    erros += count_module_class_order_violations(filepath, tree)
-    erros += count_module_function_order_violations(filepath, tree)
-    erros += count_parameter_order_violations(filepath, tree)
-    return erros
+    errors = 0
+    errors += count_class_method_order_violations(filepath, tree)
+    errors += count_module_class_order_violations(filepath, tree)
+    errors += count_module_function_order_violations(filepath, tree)
+    errors += count_parameter_order_violations(filepath, tree)
+    return errors
 
 
 if __name__ == "__main__":
-    print("🔍 Iniciando Linter Anti-Honeypot (Ordem Alfabética)...\n")
+    print("🔍 Running alphabetical-order linter...\n")
 
-    arquivos_python = glob.glob("**/*.py", recursive=True)
-    total_erros = 0
+    python_files = glob.glob("**/*.py", recursive=True)
+    total_errors = 0
 
-    for arquivo in arquivos_python:
-        if ".venv" not in arquivo and "venv" not in arquivo:
-            total_erros += verify_file(arquivo)
+    for filepath in python_files:
+        if ".venv" not in filepath and "venv" not in filepath:
+            total_errors += verify_file(filepath)
 
-    if total_erros == 0:
-        print("✅ Tudo limpo! Funções, classes, métodos e parâmetros em ordem alfabética.")
+    if total_errors == 0:
+        print("✅ OK: functions, classes, methods, and parameters are in alphabetical order.")
     else:
-        print(f"🚨 Encontrados {total_erros} erros de ordem alfabética. Arrume antes de enviar.")
+        print(f"🚨 Found {total_errors} alphabetical-order violation(s). Fix them before submitting.")
 
-    sys.exit(1 if total_erros else 0)
+    sys.exit(1 if total_errors else 0)
