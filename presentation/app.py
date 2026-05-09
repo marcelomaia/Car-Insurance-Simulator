@@ -22,5 +22,11 @@ def create_app() -> FastAPI:
 
     application = FastAPI(title="Car Insurance Premium Simulator", version="0.1.0")
     application.add_exception_handler(DomainError, domain_error_handler)
+
+    @application.get("/health")
+    def health_check() -> dict[str, str]:
+        """Liveness probe for Docker / orchestrators (`docker-compose` healthcheck)."""
+        return {"status": "ok"}
+
     application.include_router(router)
     return application

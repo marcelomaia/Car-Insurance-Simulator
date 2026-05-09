@@ -22,6 +22,13 @@ class _RaisesDomainError:
         raise DomainError("generic failure")
 
 
+def test_health_endpoint_returns_ok():
+    client = TestClient(create_app())
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 def test_simulate_generic_domain_error_returns_domain_error_code():
     application = create_app()
     application.dependency_overrides[get_current_year] = lambda: 2026

@@ -1,0 +1,14 @@
+.git
+.github
+.pytest_cache
+.ruff_cache
+.venv
+venv
+htmlcov
+**/__pycache__
+**/*.pyc
+**/tests
+coverage.xml
+.env
+execution_plan.md
+sonar-project.properties

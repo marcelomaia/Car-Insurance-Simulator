@@ -10,7 +10,7 @@ This document is the canonical phased implementation plan for this repository. S
 - [x] Phase 2 — Application (`application/`: use cases, DI-friendly services)
 - [x] Phase 3 — Infrastructure (`infrastructure/`: `pydantic-settings`, mock GIS)
 - [x] Phase 4 — Presentation (`presentation/`: FastAPI routers, IO schemas)
-- [ ] Phase 5 — Docker (`Dockerfile`, `docker-compose.yml`)
+- [x] Phase 5 — Docker (`Dockerfile`, `docker-compose.yml`)
 - [ ] Phase 6 — Tests and docs (pytest, readme updates as needed)
 
 ---
@@ -203,6 +203,8 @@ Python version in CI is pinned in the workflow file (currently **3.13** on `ubun
 ---
 
 ## Phase 5 — Docker and runtime
+
+**Delivered:** root **`Dockerfile`** (Python 3.13 slim, **`appuser`**, `uvicorn` on `0.0.0.0:8000`), **`.dockerignore`**, **`docker-compose.yml`** (port **8000**, healthcheck on **`/health`**), **`GET /health`** in **`presentation/app.py`**. Swagger at **`/docs`** (and ReDoc at **`/redoc`**) on the published port — see [readme.md](readme.md) **Docker** section.
 
 - **`Dockerfile`:** production-oriented; non-root user; Uvicorn.
 - **`docker-compose.yml`:** port mapping, env for settings; optional `/health` healthcheck.
