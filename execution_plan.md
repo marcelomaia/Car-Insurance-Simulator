@@ -45,6 +45,7 @@ flowchart TB
     UseCases --> Entities
     UseCases --> VOs
     UseCases --> DomainPorts
+    UseCases --> Events
     GisAdapter --> DomainPorts
     Settings --> UseCases
     Schemas --> Routers
@@ -62,15 +63,17 @@ flowchart TB
     DTO --> UC["application: SimulatePremiumUseCase.execute"]
 
     subgraph domain_layer [domain — called only from use case]
-        Calc["PremiumCalculator"]
+        Calc["PremiumCalculator (domain service)"]
         GisPort["GisRateAdjustmentPort"]
-        Result["PremiumCalculated"]
+        subgraph domain_events [domain/events]
+            PE["PremiumCalculated"]
+        end
     end
 
     UC --> Calc
     UC --> GisPort
-    UC --> Result
-    Result --> MapperOut["presentation: premium_simulation_response_from_calculated"]
+    UC --> PE
+    PE --> MapperOut["presentation: premium_simulation_response_from_calculated"]
     MapperOut --> Out([HTTP JSON])
 
     GISImpl["infrastructure: MockGisService"]
