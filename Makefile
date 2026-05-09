@@ -6,6 +6,7 @@ coverage:
 		--cov=application \
 		--cov=domain \
 		--cov=infrastructure \
+		--cov=presentation \
 		--cov=scripts \
 		--cov-report=term-missing \
 		--cov-report=xml:coverage.xml \
@@ -19,6 +20,7 @@ coverage-html:
 		--cov=application \
 		--cov=domain \
 		--cov=infrastructure \
+		--cov=presentation \
 		--cov=scripts \
 		--cov-report=term-missing \
 		--cov-report=html:htmlcov
@@ -28,6 +30,7 @@ coverage-xml:
 		--cov=application \
 		--cov=domain \
 		--cov=infrastructure \
+		--cov=presentation \
 		--cov=scripts \
 		--cov-report=term-missing \
 		--cov-report=xml:coverage.xml

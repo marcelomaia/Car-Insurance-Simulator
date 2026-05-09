@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["application*", "domain*", "infrastructure*"]
-exclude = ["application.tests*", "domain.tests*", "infrastructure.tests*", "scripts.tests*"]
+include = ["application*", "domain*", "infrastructure*", "presentation*"]
+exclude = ["application.tests*", "domain.tests*", "infrastructure.tests*", "presentation.tests*", "scripts.tests*"]
 
 [project]
 name = "car-insurance-premium-simulator"
@@ -13,12 +13,15 @@ version = "0.1.0"
 description = "Car Insurance Premium Simulator microservice"
 requires-python = ">=3.11"
 dependencies = [
+    "fastapi>=0.115",
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
+    "uvicorn[standard]>=0.32",
 ]
 
 [project.optional-dependencies]
 dev = [
+    "httpx>=0.27",
     "pre-commit>=4.0",
     "pytest>=8.0",
     "pytest-cov>=6.0",
@@ -27,11 +30,11 @@ dev = [
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["application/tests", "domain/tests", "infrastructure/tests", "scripts/tests"]
+testpaths = ["application/tests", "domain/tests", "infrastructure/tests", "presentation/tests", "scripts/tests"]
 
 [tool.coverage.run]
 branch = false
-source = ["application", "domain", "infrastructure", "scripts"]
+source = ["application", "domain", "infrastructure", "presentation", "scripts"]
 omit = [
     "**/.venv/**",
     "**/tests/**",
@@ -39,6 +42,7 @@ omit = [
     "application/tests/**",
     "domain/tests/**",
     "infrastructure/tests/**",
+    "presentation/tests/**",
     "scripts/tests/**",
 ]
 

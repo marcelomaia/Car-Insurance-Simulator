@@ -9,7 +9,7 @@ This document is the canonical phased implementation plan for this repository. S
 - [x] Phase 1.1 — Domain tests & CI quality gate (pytest + Ruff + honeypot script on GitHub Actions)
 - [x] Phase 2 — Application (`application/`: use cases, DI-friendly services)
 - [x] Phase 3 — Infrastructure (`infrastructure/`: `pydantic-settings`, mock GIS)
-- [ ] Phase 4 — Presentation (`presentation/`: FastAPI routers, IO schemas)
+- [x] Phase 4 — Presentation (`presentation/`: FastAPI routers, IO schemas)
 - [ ] Phase 5 — Docker (`Dockerfile`, `docker-compose.yml`)
 - [ ] Phase 6 — Tests and docs (pytest, readme updates as needed)
 
@@ -130,13 +130,13 @@ make coverage-html  # HTML under htmlcov/
 make coverage       # terminal + coverage.xml + htmlcov/
 ```
 
-- **[`sonar-project.properties`](sonar-project.properties)** sets **`sonar.organization`**, **`sonar.python.coverage.reportPaths=coverage.xml`**, **`sonar.sources=application,domain,scripts`**, **`sonar.tests=application/tests,domain/tests,scripts/tests`**, test-folder exclusions from main sources, and shared exclusions. The Sonar scanner must run **after** tests produce **`coverage.xml`**.
+- **[`sonar-project.properties`](sonar-project.properties)** sets **`sonar.organization`**, **`sonar.python.coverage.reportPaths=coverage.xml`**, **`sonar.sources`** including **`application`**, **`domain`**, **`infrastructure`**, **`presentation`**, **`scripts`**, matching **`sonar.tests`** roots and test-folder exclusions from main sources, and shared exclusions. The Sonar scanner must run **after** tests produce **`coverage.xml`**.
 
 ### GitHub Actions workflow
 
 - Workflow file: **[`.github/workflows/ci.yml`](.github/workflows/ci.yml)** (runs on **push** and **pull_request** to the default branch).
 - Checkout uses **`fetch-depth: 0`** so SonarCloud can analyze blame/history correctly.
-- Jobs run **Ruff format** (`--check`), **Ruff lint** (`ruff check`), the **alphabetical-order** script, **pytest with coverage** (`--cov=application --cov=domain --cov=scripts`, writes **`coverage.xml`**), then **[SonarSource/sonarqube-scan-action](https://github.com/SonarSource/sonarqube-scan-action)** (**SonarCloud Scan**).
+- Jobs run **Ruff format** (`--check`), **Ruff lint** (`ruff check`), the **alphabetical-order** script, **pytest with coverage** (`--cov=application --cov=domain --cov=infrastructure --cov=presentation --cov=scripts`, writes **`coverage.xml`**), then **[SonarSource/sonarqube-scan-action](https://github.com/SonarSource/sonarqube-scan-action)** (**SonarCloud Scan**).
 - **Secrets (repository → Settings → Secrets and variables → Actions):** **`SONAR_TOKEN`** (analysis token from SonarCloud or SonarQube). **`SONAR_HOST_URL`** — base URL of your SonarQube Server (e.g. `https://sonarqube.example.com`); for **SonarCloud** use `https://sonarcloud.io` or omit if your setup injects it elsewhere. **`GITHUB_TOKEN`** is provided automatically for PR decoration when needed.
 
 Python version in CI is pinned in the workflow file (currently **3.13** on `ubuntu-latest`). Extend with a version matrix later if needed.
@@ -160,10 +160,12 @@ Python version in CI is pinned in the workflow file (currently **3.13** on `ubun
 
 ## Phase 4 — Presentation (`presentation/`)
 
+**Delivered:** `presentation/schemas/simulate_premium.py` (request/response models), `presentation/deps.py` (`Settings`, `MockGisService`, `SimulatePremiumUseCase`, `current_year`), `presentation/api/router.py` (**POST `/v1/premium/simulate`**), `presentation/app.py` (**`create_app()`**, **`DomainError` → 422** with `detail.code`), repo-root **`main.py`** (**`uvicorn main:app`**), **`presentation/tests/`** (`TestClient`).
+
 - **Input:** `broker_fee`, `deductible_percentage`, `make`, `model`, `registration_location` (optional), `value`, `year`.
 - **Output:** `applied_rate`, `calculated_premium`, `deductible_value`, `make`, `model`, `policy_limit`, `value`, `year`.
 - FastAPI router + `Depends()` for settings and GIS port; **`create_app()`** factory.
-- **Errors:** Map **`domain.exceptions`** (`DomainError` subclasses such as **`InvalidDeductiblePercentageError`**, **`NegativeAppliedRateError`**) to HTTP **4xx** (e.g. **422** Unprocessable Entity or **400** Bad Request) with stable message keys—see **readme.md §5** and **Critical implementation notes** below.
+- **Errors:** Map **`domain.exceptions`** (`DomainError` subclasses such as **`InvalidDeductiblePercentageError`**, **`NegativeAppliedRateError`**) to HTTP **422** with **`{"detail": {"code": "...", "message": "..."}}`** — see **readme.md §5** and **Critical implementation notes** below.
 
 ---
 

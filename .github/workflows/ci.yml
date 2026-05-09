@@ -32,7 +32,7 @@ jobs:
         run: python scripts/check_order.py
 
       - name: Pytest with coverage (XML for Sonar)
-        run: python -m pytest --cov=application --cov=domain --cov=infrastructure --cov=scripts --cov-report=xml:coverage.xml --cov-report=term-missing
+        run: python -m pytest --cov=application --cov=domain --cov=infrastructure --cov=presentation --cov=scripts --cov-report=xml:coverage.xml --cov-report=term-missing
 
       - name: Sonar scan
         uses: SonarSource/sonarqube-scan-action@v8
