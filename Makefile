@@ -3,6 +3,7 @@
 # Full report: terminal + Cobertura XML (Sonar) + HTML site under htmlcov/
 coverage:
 	python -m pytest \
+		--cov=application \
 		--cov=domain \
 		--cov=scripts \
 		--cov-report=term-missing \
@@ -14,6 +15,7 @@ coverage-clean:
 
 coverage-html:
 	python -m pytest \
+		--cov=application \
 		--cov=domain \
 		--cov=scripts \
 		--cov-report=term-missing \
@@ -21,6 +23,7 @@ coverage-html:
 
 coverage-xml:
 	python -m pytest \
+		--cov=application \
 		--cov=domain \
 		--cov=scripts \
 		--cov-report=term-missing \
