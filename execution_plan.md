@@ -96,6 +96,7 @@ Use **setuptools** and **one** `pyproject.toml` (no separate `requirements.txt` 
 - **Domain events:** e.g. premium calculated.
 - **Port (ABC):** GIS adjustment port; **parameters alphabetically** on each method.
 - **Pure domain math:** rate from age and value chunks (settings passed in, not read from env); policy limit and premium per [readme.md](readme.md).
+- **Domain errors:** [readme.md](readme.md) **§5** invariants are enforced with **`domain.exceptions`** (`InvalidDeductiblePercentageError`, `NegativeAppliedRateError`, base `DomainError`).
 
 Naming: **all defs and methods** alphabetized per file/class as enforced by Phase 0.
 
@@ -162,6 +163,7 @@ Python version in CI is pinned in the workflow file (currently **3.13** on `ubun
 - **Input:** `broker_fee`, `deductible_percentage`, `make`, `model`, `registration_location` (optional), `value`, `year`.
 - **Output:** `applied_rate`, `calculated_premium`, `deductible_value`, `make`, `model`, `policy_limit`, `value`, `year`.
 - FastAPI router + `Depends()` for settings and GIS port; **`create_app()`** factory.
+- **Errors:** Map **`domain.exceptions`** (`DomainError` subclasses such as **`InvalidDeductiblePercentageError`**, **`NegativeAppliedRateError`**) to HTTP **4xx** (e.g. **422** Unprocessable Entity or **400** Bad Request) with stable message keys—see **readme.md §5** and **Critical implementation notes** below.
 
 ---
 
@@ -176,10 +178,17 @@ Python version in CI is pinned in the workflow file (currently **3.13** on `ubun
 
 - Unit tests for domain math (readme examples), GIS bounds, `check_order` in CI.
 - Integration tests with `httpx` and dependency overrides.
+- Keep **[readme.md](readme.md)** in sync with domain rules (especially **§5 Valid quote semantics**, deductible fraction, GIS additive range, rejected combinations).
 
 ---
 
 ## Critical implementation notes
+
+### GIS, intrinsic rate, and valid premiums (readme §§1, 4–5)
+
+- **Intrinsic rate** comes from **[readme.md](readme.md) §1** (age + value chunks); **`current_year`** is supplied by the application/use case, never read from a clock inside **`domain/`** (see year/age row below).
+- **GIS:** **[readme.md](readme.md) §4** allows an extra variation in **[−2%, +2%]**. Implementation: **`gis_variation`** as a decimal (−0.02 … +0.02), **additive**: **`applied_rate = intrinsic_rate + gis_variation`** (same convention as **Phase 2** / **`PremiumCalculator.compute_applied_rate`**).
+- **Valid quote:** For outputs to match **§2–3**, enforce **`deductible_percentage ∈ [0, 1]`** and **`applied_rate ≥ 0`** before completing premium and limit breakdowns. Combinations that violate this (e.g. minimum GIS + very small intrinsic rate → negative **`applied_rate`**) **must not** return a successful premium; raise **`InvalidDeductiblePercentageError`** / **`NegativeAppliedRateError`** from **`domain.exceptions`**—documented in **readme §5**.
 
 ### The architect’s nuance: year / age (keep the domain pure)
 
@@ -193,7 +202,8 @@ Optional: expose **`reference_year`** via settings later if you need replay/back
 
 | Topic | Decision |
 |--------|----------|
-| **Applied rate vs GIS** | Apply GIS after intrinsic age/value rate; document formula briefly. |
+| **Applied rate vs GIS** | **`applied_rate = intrinsic_rate + gis_variation`** (readme §4–5); **`gis_variation ∈ [−0.02, +0.02]`** for real adapters; reject **`applied_rate < 0`** for quote completion (**`NegativeAppliedRateError`**). |
+| **Deductible input** | Fraction **`[0, 1]`** everywhere (**readme §5**, **`InvalidDeductiblePercentageError`** if outside). |
 | **SOLID / DI** | FastAPI `Depends()` + constructor injection; tests override dependencies. |
 | **Alphabetical** | Parameters + definition order enforced by extended checker. |
 | **Year / age** | **Application** supplies **`current_year: int`** (resolved per request, typically `datetime.now().year`). **Domain** takes **`current_year`** as an argument; **must not** read the system clock—keeps age math pure and tests deterministic across calendar years. |

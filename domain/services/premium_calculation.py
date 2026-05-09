@@ -9,8 +9,21 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from domain.entities.car import Car
+from domain.exceptions import InvalidDeductiblePercentageError, NegativeAppliedRateError
 from domain.value_objects.policy_limit_breakdown import PolicyLimitBreakdown
 from domain.value_objects.premium_breakdown import PremiumBreakdown
+
+
+def _applied_rate_non_negative_or_raise(applied_rate: Decimal) -> None:
+    if applied_rate < Decimal("0"):
+        msg = "applied_rate cannot be negative; combined intrinsic and GIS rate must be non-negative."
+        raise NegativeAppliedRateError(msg)
+
+
+def _deductible_percentage_unit_interval_or_raise(deductible_percentage: Decimal) -> None:
+    if deductible_percentage < Decimal("0") or deductible_percentage > Decimal("1"):
+        msg = "deductible_percentage must be between 0 and 1 inclusive (fraction of coverage/premium)."
+        raise InvalidDeductiblePercentageError(msg)
 
 
 @dataclass(frozen=True)
@@ -42,6 +55,7 @@ class PremiumCalculator:
 
     def compute_policy_limit_breakdown(self, car: Car, deductible_percentage: Decimal) -> PolicyLimitBreakdown:
         """Derive base limit, deductible monetary value, and final policy limit per product rules."""
+        _deductible_percentage_unit_interval_or_raise(deductible_percentage)
         base_policy_limit = car.value * self.policy.base_coverage_percentage
         deductible_value = base_policy_limit * deductible_percentage
         policy_limit = base_policy_limit - deductible_value
@@ -59,6 +73,8 @@ class PremiumCalculator:
         deductible_percentage: Decimal,
     ) -> PremiumBreakdown:
         """Compute base premium, deductible discount, and final premium including broker fee."""
+        _applied_rate_non_negative_or_raise(applied_rate)
+        _deductible_percentage_unit_interval_or_raise(deductible_percentage)
         base_premium = car.value * applied_rate
         deductible_discount = base_premium * deductible_percentage
         calculated_premium = base_premium - deductible_discount + broker_fee

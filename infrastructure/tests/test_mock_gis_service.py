@@ -14,6 +14,14 @@ def test_rate_variation_deterministic_for_identical_address():
     assert first == second
 
 
+def test_rate_variation_empty_city_country_strings_are_stable():
+    service = MockGisService()
+    address = Address(city="", country="")
+    first = service.rate_variation_for_address(address)
+    second = service.rate_variation_for_address(address)
+    assert first == second
+
+
 def test_rate_variation_ignores_case_and_outer_whitespace():
     service = MockGisService()
     a = Address(city="  Lisbon  ", country="pt")

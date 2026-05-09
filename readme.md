@@ -49,6 +49,19 @@ If a **registration location** is provided, integrate with a **Geographic Inform
 
 - Suggested approach: Apply an additional rate variation between **-2% and +2%** depending on the risk associated with the location.
 
+### 5. **MY COMMENT: Valid quote semantics (aligned with §§2–4)**
+
+These rules refine the formulas above so outputs match real insurance semantics (premium payable by the customer, limits that stay coherent).
+
+| Rule | Meaning |
+|------|--------|
+| **Deductible scale** | `deductible_percentage` is a **fraction in `[0, 1]`** everywhere it appears (premium §2 and policy limit §3). Example: **`0.10` = 10%**, not `10`. |
+| **GIS combines additively** | First compute the **intrinsic rate** from §1 (age + value). If GIS applies (§4), add an adjustment **between −2% and +2%** (i.e. **−0.02 … +0.02** as a decimal rate). **`applied_rate = intrinsic_rate + gis_variation`**. |
+| **When arithmetic produces nonsense** | With GIS at **−2%**, a **very small intrinsic rate** (e.g. new car, low value) can make **`applied_rate` negative** in pure math. **Premium** is **`car value × applied_rate`** (§2), so a negative rate would imply the insurer “pays” the customer. **Such combinations are not valid quotes:** the service **rejects** them instead of returning negative premiums or limits broken by impossible deductibles. |
+| **Invalid deductible** | Any **`deductible_percentage` outside `[0, 1]`** is rejected (same fractional scale as in the input contract below). |
+
+Successful API responses expose **`applied_rate`**, **`calculated_premium`**, **`policy_limit`**, and **`deductible_value`** only when these constraints pass.
+
 ## Interface Contracts
 
 ### **Input Interface**
