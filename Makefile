@@ -5,6 +5,7 @@ coverage:
 	python -m pytest \
 		--cov=application \
 		--cov=domain \
+		--cov=infrastructure \
 		--cov=scripts \
 		--cov-report=term-missing \
 		--cov-report=xml:coverage.xml \
@@ -17,6 +18,7 @@ coverage-html:
 	python -m pytest \
 		--cov=application \
 		--cov=domain \
+		--cov=infrastructure \
 		--cov=scripts \
 		--cov-report=term-missing \
 		--cov-report=html:htmlcov
@@ -25,6 +27,7 @@ coverage-xml:
 	python -m pytest \
 		--cov=application \
 		--cov=domain \
+		--cov=infrastructure \
 		--cov=scripts \
 		--cov-report=term-missing \
 		--cov-report=xml:coverage.xml

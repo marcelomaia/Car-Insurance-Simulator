@@ -8,7 +8,7 @@ This document is the canonical phased implementation plan for this repository. S
 - [x] Phase 1 — Domain (`domain/`: entities, value objects, aggregates, events, ports, pure math)
 - [x] Phase 1.1 — Domain tests & CI quality gate (pytest + Ruff + honeypot script on GitHub Actions)
 - [x] Phase 2 — Application (`application/`: use cases, DI-friendly services)
-- [ ] Phase 3 — Infrastructure (`infrastructure/`: `pydantic-settings`, mock GIS)
+- [x] Phase 3 — Infrastructure (`infrastructure/`: `pydantic-settings`, mock GIS)
 - [ ] Phase 4 — Presentation (`presentation/`: FastAPI routers, IO schemas)
 - [ ] Phase 5 — Docker (`Dockerfile`, `docker-compose.yml`)
 - [ ] Phase 6 — Tests and docs (pytest, readme updates as needed)
